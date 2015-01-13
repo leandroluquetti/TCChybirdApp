@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>Web App</title>
+        <link rel="stylesheet" href="css/jquery.mobile.min.css" />
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery.mobile.min.js"></script>
+		<script>
+		   $(function() {
+		    $("#btnlimpar").bind("tap", limparBusca);
+		    $("#btnbuscar").bind("tap", buscaEndereco);
+
+		    function limparBusca(event) {
+		        $("#search").val('');
+		        $("#lista").empty();
+		    }
+
+		    function buscaEndereco(event) {
+		        if (window.navigator.onLine) {
+		            var url = 'https://maps.googleapis.com/maps/api/geocode/json';
+		            jQuery.ajax({
+		                url: url,
+		                dataType: 'JSON',
+		                type: 'GET',
+		                data: {
+		                    address: $("#search").val(),
+		                    sensor: 'false',
+		                    language: 'br'
+		                },
+		                success: function(data, textStatus, jqXHR) {
+                            $("#lista").empty();    
+		                    var taginicio = '<li><h2>';
+		                    var tagmeio = '</h2><p>';
+		                    var tagfim = '</p></li>';
+		                    var enderecos = data.results[0].address_components;
+		                    var endereco = data.results[0].formatted_address;
+		                    var localizacao = data.results[0].geometry.location;
+		                    $("#lista").append(taginicio + endereco + tagmeio + 'formatted_address' + tagfim);
+		                    $("#lista").append(taginicio + localizacao.lat + tagmeio + 'lat' + tagfim);
+		                    $("#lista").append(taginicio + localizacao.lng + tagmeio + 'lng' + tagfim);
+		                    for (index = 0; index < enderecos.length; index++) {
+		                        $("#lista").append(taginicio + enderecos[index].long_name + tagmeio + enderecos[index].types[0] + tagfim);
+		                    }
+		                    $("#lista").listview("refresh");
+		                },
+
+		                error: function(jqXHR, textStatus, errorThrown) {
+		                    alert(errorThrown + textStatus);
+		                }
+		            });
+		        } else alert('Sem conexão com a internet, verifique e tente novamente.')
+		    }
+		});
+		</script>
+    </head>
+    <body>
+
+<body>
+    <div data-role="page" id="page1">
+            <div data-role="header">
+                <h1>WebApp</h1>
+                <button class="ui-btn-right" data-icon="search" data-iconpos="notext" id="btnbuscar"/>
+                <button class="ui-btn-left" data-icon="delete" data-iconpos="notext" id="btnlimpar"/>
+            </div>
+            <div data-role="content">
+                <div data-role="fieldcontain">
+				<input type="search" name="search" id="search" value="" placeholder="Digite a rua a buscar"/>
+                </div>
+					<ul data-role="listview" id="lista" data-inset="true">
+					</ul>
+                </div>
+        </div>
+    </body>
+</html>
